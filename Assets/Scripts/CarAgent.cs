@@ -51,7 +51,7 @@ public class CarAgent : Agent
         if (other.CompareTag("Target"))
         {
             SetReward(1f);
-            MoveTarget();
+            EndEpisode();
         }
     }
 
@@ -60,7 +60,10 @@ public class CarAgent : Agent
         // Target and Agent positions
         sensor.AddObservation(target.localPosition);
         sensor.AddObservation(transform.localPosition);
-        sensor.AddObservation(transform.rotation);
+        
+        // Agent rotation
+        sensor.AddObservation(transform.rotation.y);
+        sensor.AddObservation(transform.rotation.z);
 
         // Agent velocity
         sensor.AddObservation(rBody.velocity.x);
