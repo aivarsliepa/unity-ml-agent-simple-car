@@ -494,7 +494,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 10
+    VectorObservationSize: 12
     NumStackedVectorObservations: 1
     VectorActionSize: 02000000
     VectorActionDescriptions: []
@@ -532,6 +532,13 @@ MonoBehaviour:
   throttleStrenght: 20000
   maxSteer: 20
   target: {fileID: 0}
+  targetLocalPosition: {x: 0, y: 0, z: 0}
+  localPosition: {x: 0, y: 0, z: 0}
+  rotationY: 0
+  rotationZ: 0
+  velocityX: 0
+  velocityZ: 0
+  angularVelocity: {x: 0, y: 0, z: 0}
 --- !u!114 &234925071
 MonoBehaviour:
   m_ObjectHideFlags: 0

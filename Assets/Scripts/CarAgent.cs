@@ -22,7 +22,6 @@ public class CarAgent : Agent
     Rigidbody rBody;
 
     private bool didFallOffPlatform = false;
-    private bool isUpsideDown = false;
 
     public override void Initialize()
     {
@@ -42,10 +41,10 @@ public class CarAgent : Agent
         }
 
         didFallOffPlatform = transform.localPosition.y < 0;
-        isUpsideDown = Vector3.Dot(transform.up, Vector3.down) > 0;
+        var isUpsideDown = Vector3.Dot(transform.up, Vector3.down) > 0;
         if (didFallOffPlatform || isUpsideDown)
         {
-            SetReward(-1f);
+            AddReward(-1f);
             EndEpisode();
         }
     }
@@ -54,24 +53,48 @@ public class CarAgent : Agent
     {
         if (other.CompareTag("Target"))
         {
-            SetReward(1f);
+            AddReward(1f);
             EndEpisode();
         }
     }
 
+    // debug observations
+    //public Vector3 targetLocalPosition;
+    //public Vector3 localPosition;
+    //public float rotationY;
+    //public float rotationZ;
+    //public float velocityX;
+    //public float velocityZ;
+    //public Vector3 angularVelocity;
+
     public override void CollectObservations(VectorSensor sensor)
     {
         // Target and Agent positions
-        sensor.AddObservation(target.localPosition);
-        sensor.AddObservation(transform.localPosition);
+        //sensor.AddObservation(target.localPosition);
+        //sensor.AddObservation(transform.localPosition);
         
         // Agent rotation
-        sensor.AddObservation(transform.rotation.y);
-        sensor.AddObservation(transform.rotation.z);
+        //sensor.AddObservation(transform.rotation.eulerAngles.y);
+        //sensor.AddObservation(transform.rotation.eulerAngles.z);
 
         // Agent velocity
         sensor.AddObservation(rBody.velocity.x);
         sensor.AddObservation(rBody.velocity.z);
+
+        // Agent angular velocity (steering and rolling)
+        //sensor.AddObservation(rBody.angularVelocity.y);
+        //sensor.AddObservation(rBody.angularVelocity.z);
+
+        //targetLocalPosition = target.localPosition;
+        //localPosition = transform.localPosition;
+
+        //rotationY = transform.rotation.eulerAngles.y;
+        //rotationZ = transform.rotation.eulerAngles.z;
+
+        //velocityX = rBody.velocity.x;
+        //velocityZ = rBody.velocity.z;
+
+        //angularVelocity = rBody.angularVelocity;
     }
 
     public override void OnActionReceived(float[] vectorAction)
@@ -79,6 +102,8 @@ public class CarAgent : Agent
         // Actions, size = 2
         steer = vectorAction[0];
         throttle = vectorAction[1];
+
+        AddReward(-1f / MaxStep);
     }
 
     public override void OnEpisodeBegin()
@@ -93,12 +118,8 @@ public class CarAgent : Agent
             transform.localPosition = Vector3.zero;
         }
 
-        if (isUpsideDown)
-        {
-            isUpsideDown = false;
-
-            transform.rotation = Quaternion.identity;
-        }
+        var currentRotation = transform.rotation.eulerAngles;
+        transform.rotation = Quaternion.Euler(currentRotation.x, currentRotation.y, 0);
 
         MoveTarget();
     }
@@ -106,9 +127,9 @@ public class CarAgent : Agent
     void MoveTarget()
     {
         // Move the target to a new spot
-        target.localPosition = new Vector3(Random.Range(-40, 40),
+        target.localPosition = new Vector3(Random.Range(-30, 30),
                                            0.5f,
-                                           Random.Range(-40, 40));
+                                           Random.Range(-30, 30));
     }
 
     public override void Heuristic(float[] actionsOut)
