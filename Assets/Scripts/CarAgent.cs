@@ -21,6 +21,9 @@ public class CarAgent : Agent
 
     Rigidbody rBody;
 
+    private bool didFallOffPlatform = false;
+    private bool isUpsideDown = false;
+
     public override void Initialize()
     {
         rBody = GetComponent<Rigidbody>();
@@ -38,8 +41,9 @@ public class CarAgent : Agent
             wheel.steerAngle = maxSteer * steer;
         }
 
-        // Fell off platform or upside down
-        if (transform.localPosition.y < 0 || Vector3.Dot(transform.up, Vector3.down) > 0)
+        didFallOffPlatform = transform.localPosition.y < 0;
+        isUpsideDown = Vector3.Dot(transform.up, Vector3.down) > 0;
+        if (didFallOffPlatform || isUpsideDown)
         {
             SetReward(-1f);
             EndEpisode();
@@ -79,12 +83,21 @@ public class CarAgent : Agent
 
     public override void OnEpisodeBegin()
     {
-        if (transform.localPosition.y < 0)
+        if (didFallOffPlatform)
         {
+            didFallOffPlatform = false;
+
             // If the Agent fell, zero its momentum
             rBody.angularVelocity = Vector3.zero;
             rBody.velocity = Vector3.zero;
             transform.localPosition = Vector3.zero;
+        }
+
+        if (isUpsideDown)
+        {
+            isUpsideDown = false;
+
+            transform.rotation = Quaternion.identity;
         }
 
         MoveTarget();
